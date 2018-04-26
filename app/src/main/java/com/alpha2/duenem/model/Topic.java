@@ -12,7 +12,7 @@ public class Topic implements Serializable {
     private String description;
     private String uid;
     private Discipline discipline;
-
+    private int curr_level;
     public Discipline getDiscipline() {
         return discipline;
     }
@@ -78,5 +78,13 @@ public class Topic implements Serializable {
     }
     public boolean isDone(){
         return this.isDone;
+    }
+
+    public int getCurr_level() {
+        return curr_level;
+    }
+
+    public void setCurr_level(int curr_level) {
+        this.curr_level = curr_level;
     }
 }

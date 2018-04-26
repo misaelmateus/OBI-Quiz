@@ -94,6 +94,8 @@ public class CardPagerAdapter extends PagerAdapter implements CardAdapter {
         TextView contentTextView = (TextView) view.findViewById(R.id.contentTextViewAdapter);
         Button bt = (Button) view.findViewById(R.id.buttonAdapter);
         view.findViewById(R.id.bookmark).setVisibility(View.GONE);
+
+
         if(item.isDone()){
             bt.setText(R.string.refazer);
             view.findViewById(R.id.bookmark).setVisibility(View.VISIBLE);
@@ -105,7 +107,7 @@ public class CardPagerAdapter extends PagerAdapter implements CardAdapter {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, QuestionActivity.class);
-                intent.putExtra(QuestionActivity.LESSON_EXTRA, item);
+                intent.putExtra(QuestionActivity.TOPIC_EXTRA, item);
                 context.startActivity(intent);
             }
         });

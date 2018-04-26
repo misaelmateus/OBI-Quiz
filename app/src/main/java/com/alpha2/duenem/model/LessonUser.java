@@ -1,5 +1,7 @@
 package com.alpha2.duenem.model;
 
+import android.util.Pair;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.PropertyName;
 
@@ -7,9 +9,15 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class LessonUser implements Serializable {
-    private String uidTopic;
+    private List<Historic> historic;
+    private String uidLesson;
+    private Boolean done = false;
+
+
+    // System of Memorization -------------------------//
     private Date lastDate;
     private int correctStreak;
     private Date nextDate;
@@ -112,15 +120,35 @@ public class LessonUser implements Serializable {
             correctStreak++;
         }
     }
+
+    public void userDoneQuestion(int grade, Date date, int time){
+
+        int q = 0;
+        if(grade >= 90) q = 5;
+        else if(grade >= 80) q = 4;
+        else if(grade >= 60) q = 3;
+        else if(grade >= 50) q = 2;
+        else if(grade >= 30) q = 1;
+        boolean isDone = false;
+        if(q >= 3) isDone = true;
+        setNextInterval(q, isDone);
+        setNextDate(date);
+        this.done |= isDone;
+        historic.add(new Historic(date, grade, time));
+    }
     public int getInterval(){
         return interval;
     }
 
-    public String getUidTopic() {
-        return uidTopic;
+    public String getUidLesson() {
+        return uidLesson;
     }
 
-    public void setUidTopic(String uidTopic) {
-        this.uidTopic = uidTopic;
+    public void setUidLesson(String uidTopic) {
+        this.uidLesson = uidTopic;
+    }
+
+    public Boolean getDone() {
+        return done;
     }
 }

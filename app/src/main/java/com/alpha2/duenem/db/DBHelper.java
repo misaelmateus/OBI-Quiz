@@ -1,6 +1,7 @@
 package com.alpha2.duenem.db;
 
 import com.alpha2.duenem.model.Discipline;
+import com.alpha2.duenem.model.Lesson;
 import com.alpha2.duenem.model.User;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;

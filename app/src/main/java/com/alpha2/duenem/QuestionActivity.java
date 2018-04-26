@@ -1,6 +1,7 @@
 package com.alpha2.duenem;
 
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.View;
@@ -15,34 +16,44 @@ import com.alpha2.duenem.model.Lesson;
 import com.alpha2.duenem.model.LessonUser;
 import com.alpha2.duenem.model.Material;
 import com.alpha2.duenem.model.Question;
+import com.alpha2.duenem.model.Topic;
 import com.alpha2.duenem.model.User;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class QuestionActivity extends BaseActivity {
 
     private static final String TAG = QuestionActivity.class.getSimpleName();
-    public static final String LESSON_EXTRA = "lesson_extra";
+    public static final String TOPIC_EXTRA = "topic_extra";
 
+    private Topic mTopic;
+    private Lesson mLesson;
+    private LessonUser mLessonUser;
+
+
+
+    private Query mUserLessonRef;
     private int correctAlternative;
     private int currentMaterial;
     private List<Material> materials;
     private int contCorrect = 0;
     private boolean isQuestion = false;
+    private View mContentView;
     private SUBMIT_BUTTON_STATES buttonState;
-    private Lesson mLesson;
-    private LessonUser mLessonUser;
 
     private enum SUBMIT_BUTTON_STATES {
         CONTINUE, VERIFY
@@ -51,8 +62,86 @@ public class QuestionActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentLayout(R.layout.content_question);
-        mLesson = (Lesson) getIntent().getSerializableExtra(LESSON_EXTRA);
+        mContentView = setContentLayout(R.layout.content_question);
+        mTopic = (Topic) getIntent().getSerializableExtra(TOPIC_EXTRA);
+
+        getNextLessonFromTopic();
+    }
+
+    private void getNextLessonFromTopic(){
+        final Query mLessonRef;
+        mLessonRef = DBHelper.getLessonsFromTopic(mTopic.getUid());
+        mLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> idLessons = new ArrayList<String>();
+                for (DataSnapshot lessonSnap : dataSnapshot.getChildren()){
+                    idLessons.add(lessonSnap.getKey());
+                }
+                getNextLessonFromUser(idLessons);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, databaseError.getMessage());
+                Snackbar.make(mContentView, R.string.user_unauthorized_message, Snackbar.LENGTH_INDEFINITE)
+                        .show();
+
+            }
+        });
+    }
+
+    private void getNextLessonFromUser(final List<String> idLessons){
+        mUserLessonRef = DBHelper.getLessonUsersByUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        final List<String> idLessonsNotDone = new ArrayList<String>();
+
+        mUserLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(String idLesson : idLessons){
+                    if(!dataSnapshot.hasChild(idLesson) || dataSnapshot.child(idLesson).child("isDone").getValue() == false)
+                        idLessonsNotDone.add(idLesson);
+                }
+                if(idLessonsNotDone.size() == 0){
+                    topicCompleted();
+                }
+                else {
+                    int pos_element = new Random().nextInt(idLessonsNotDone.size());
+                    getNextLessonFromUid(idLessonsNotDone.get(pos_element));
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, databaseError.getMessage());
+                Snackbar.make(mContentView, R.string.user_unauthorized_message, Snackbar.LENGTH_INDEFINITE)
+                        .show();
+            }
+        });
+    }
+    private void getNextLessonFromUid(final String lessonUid){
+        final Query mLessonRef;
+        mLessonRef = DBHelper.getLessonsFromTopic(mTopic.getUid());
+        mLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mLesson = dataSnapshot.child(lessonUid).getValue(Lesson.class);
+                loadDataFromQuestion();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, databaseError.getMessage());
+                Snackbar.make(mContentView, R.string.user_unauthorized_message, Snackbar.LENGTH_INDEFINITE)
+                        .show();
+            }
+        });
+    }
+    private void topicCompleted(){
+        // Do after
+    }
+    protected void loadDataFromQuestion(){
         this.setTitle(mLesson.getTitle());
 
         final Query materialsQuery = DBHelper.getMaterialsFromLesson(mLesson.getUid());
@@ -119,7 +208,6 @@ public class QuestionActivity extends BaseActivity {
             }
         });
     }
-
     private void initiate() {
         User user = DuEnemApplication.getInstance().getUser();
 
@@ -147,6 +235,7 @@ public class QuestionActivity extends BaseActivity {
             nextQuestion();
         }
     }
+
 
     public void nextQuestion(){
         currentMaterial++;
@@ -275,23 +364,16 @@ public class QuestionActivity extends BaseActivity {
     }
 
     private void setUserLessonResult(int grade) {
-        int q = 0;
-        if(grade >= 90) q = 5;
-        else if(grade >= 80) q = 4;
-        else if(grade >= 65) q = 3;
-        else if(grade >= 50) q = 2;
-        else if(grade >= 30) q = 1;
+
 
         if (mLessonUser == null) {
-            if (q == 0) return;
-            else mLessonUser = new LessonUser();
+            mLessonUser = new LessonUser();
         }
 
-        mLessonUser.setNextInterval(q, mLesson.isDone());
+        mLessonUser.userDoneQuestion(grade, new Date(), -1);
 
         mLessonUser.setLastDate(new Date());
         mLessonUser.setNextDate(calculateNextDate(mLessonUser));
-        mLessonUser.setUidTopic(mLesson.getTopic().getUid());
 
         User user = DuEnemApplication.getInstance().getUser();
 
@@ -301,7 +383,7 @@ public class QuestionActivity extends BaseActivity {
         updates.put(String.format("lessonUser/%s/%s", user.getUid(), mLesson.getUid()), mLessonUser);
 
         if (!mLesson.isDone())
-            updates.put(String.format("user/%s/points", user.getUid()), user.getPoints() + q * 20);
+            updates.put(String.format("user/%s/points", user.getUid()), user.getPoints() + (mLessonUser.getDone() ? 100 : 0));
 
         root.updateChildren(updates);
     }
