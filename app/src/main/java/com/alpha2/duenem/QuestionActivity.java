@@ -57,15 +57,17 @@ public class QuestionActivity extends BaseActivity {
 
     private enum SUBMIT_BUTTON_STATES {
         CONTINUE, VERIFY
-    };
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContentView = setContentLayout(R.layout.content_question);
+
         mTopic = (Topic) getIntent().getSerializableExtra(TOPIC_EXTRA);
 
         getNextLessonFromTopic();
+
+        mContentView = setContentLayout(R.layout.content_question);
     }
 
     private void getNextLessonFromTopic(){
@@ -74,7 +76,7 @@ public class QuestionActivity extends BaseActivity {
         mLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<String> idLessons = new ArrayList<String>();
+                List<String> idLessons = new ArrayList<>();
                 for (DataSnapshot lessonSnap : dataSnapshot.getChildren()){
                     idLessons.add(lessonSnap.getKey());
                 }
