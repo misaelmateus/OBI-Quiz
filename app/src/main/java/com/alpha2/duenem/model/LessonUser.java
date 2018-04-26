@@ -8,6 +8,7 @@ import com.google.firebase.database.PropertyName;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,13 +24,12 @@ public class LessonUser implements Serializable {
     private Date nextDate;
     private double EF;
     private int interval;
-    private static SimpleDateFormat dateFormat;
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public LessonUser() {
-        if (dateFormat == null)
-            dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         this.EF = 1.3;
         this.interval = 1;
+        this.historic = new ArrayList<>();
     }
 
     public LessonUser(Date lastDate, int correctStreak, Date nextDate) {
@@ -37,8 +37,6 @@ public class LessonUser implements Serializable {
         this.lastDate = lastDate;
         this.correctStreak = correctStreak;
         this.nextDate = nextDate;
-        this.EF = 1.3;
-        this.interval = 1;
     }
 
     @Exclude

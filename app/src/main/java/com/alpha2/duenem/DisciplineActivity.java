@@ -59,8 +59,7 @@ public class DisciplineActivity extends BaseActivity {
             Discipline discipline = (Discipline) getIntent().getSerializableExtra(DISCIPLINE_EXTRA);
             mTopicRef = null;
 
-                                                                                                                                                                                                                                                                             if (discipline != null) {
-
+            if (discipline != null) {
                 setTitle(discipline.getName());
 
                 mAdapter = new ArrayAdapter<>(this,
@@ -73,7 +72,6 @@ public class DisciplineActivity extends BaseActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         mAdapter.clear();
                         for (DataSnapshot topicSnap : dataSnapshot.getChildren()) {
-
                             Topic topic = topicSnap.getValue(Topic.class);
 
                             if (topic != null) {
