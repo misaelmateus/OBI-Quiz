@@ -26,7 +26,6 @@ public class DisciplineActivity extends BaseActivity {
     private View mContentView;
 
     private static final String TAG = DisciplineActivity.class.getSimpleName();
-    private ArrayAdapter<Topic> mAdapter;
 
     private ValueEventListener mTopicRefListener;
     private Query mTopicRef;
@@ -62,15 +61,12 @@ public class DisciplineActivity extends BaseActivity {
             if (discipline != null) {
                 setTitle(discipline.getName());
 
-                mAdapter = new ArrayAdapter<>(this,
-                        android.R.layout.simple_list_item_1, new ArrayList<Topic>());
 
                 mTopicRef = DBHelper.getTopicsFromDiscipline(discipline);
 
                 mTopicRefListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mAdapter.clear();
                         for (DataSnapshot topicSnap : dataSnapshot.getChildren()) {
                             Topic topic = topicSnap.getValue(Topic.class);
 
@@ -84,7 +80,6 @@ public class DisciplineActivity extends BaseActivity {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Log.e(TAG, databaseError.getMessage());
-                        mAdapter.clear();
                         Snackbar.make(mContentView, R.string.user_unauthorized_message, Snackbar.LENGTH_INDEFINITE)
                                 .show();
                     }
