@@ -67,7 +67,9 @@ public class DisciplineActivity extends BaseActivity {
                 mTopicRefListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        mCardAdapter.clearTopics();
                         for (DataSnapshot topicSnap : dataSnapshot.getChildren()) {
+
                             Topic topic = topicSnap.getValue(Topic.class);
 
                             if (topic != null) {
