@@ -44,8 +44,6 @@ public class QuestionActivity extends BaseActivity {
     private Lesson mLesson;
     private LessonUser mLessonUser;
 
-
-
     private Query mUserLessonRef;
     private int correctAlternative;
     private int currentMaterial;
@@ -62,12 +60,11 @@ public class QuestionActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContentView = setContentLayout(R.layout.content_question);
+        mContentView.findViewById(R.id.container).setVisibility(View.INVISIBLE);
 
         mTopic = (Topic) getIntent().getSerializableExtra(TOPIC_EXTRA);
-
         getNextLessonFromTopic();
-
-        mContentView = setContentLayout(R.layout.activity_waiting);
     }
 
     private void getNextLessonFromTopic(){
@@ -112,7 +109,6 @@ public class QuestionActivity extends BaseActivity {
                 else {
                     int pos_element = new Random().nextInt(idLessonsNotDone.size());
                     getNextLessonFromUid(idLessonsNotDone.get(pos_element));
-
                 }
             }
 
@@ -133,7 +129,6 @@ public class QuestionActivity extends BaseActivity {
                 mLesson = dataSnapshot.child(lessonUid).getValue(Lesson.class);
                 mLesson.setUid(lessonUid);
                 loadDataFromQuestion();
-                mContentView = setContentLayout(R.layout.content_question);
             }
 
             @Override
@@ -144,9 +139,11 @@ public class QuestionActivity extends BaseActivity {
             }
         });
     }
-    private void topicCompleted(){
+
+    private void topicCompleted() {
         // Do after
     }
+
     protected void loadDataFromQuestion(){
         this.setTitle(mLesson.getTitle());
 
@@ -239,11 +236,12 @@ public class QuestionActivity extends BaseActivity {
             materials = mLesson.getMaterial();
             currentMaterial = -1;
             nextQuestion();
+
+            mContentView.findViewById(R.id.container).setVisibility(View.VISIBLE);
         }
     }
 
-
-    public void nextQuestion(){
+    public void nextQuestion() {
         currentMaterial++;
 
         ((ProgressBar)findViewById(R.id.progressBarQuestion)).setProgress((currentMaterial *100)/ materials.size());
@@ -350,7 +348,6 @@ public class QuestionActivity extends BaseActivity {
             }
         });
 
-
         if(!isQuestion){
             text1.setText(R.string.lesson_conclude);
             text2.setText("");
@@ -370,8 +367,6 @@ public class QuestionActivity extends BaseActivity {
     }
 
     private void setUserLessonResult(int grade) {
-
-
         if (mLessonUser == null) {
             mLessonUser = new LessonUser();
         }
