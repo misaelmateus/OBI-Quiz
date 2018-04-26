@@ -128,7 +128,7 @@ public class LessonUser implements Serializable {
         else if(grade >= 50) q = 2;
         else if(grade >= 30) q = 1;
         boolean isDone = false;
-        if(q >= 3) isDone = true;
+        if(q >= 4) isDone = true;
         setNextInterval(q, isDone);
         setNextDate(date);
         this.done |= isDone;

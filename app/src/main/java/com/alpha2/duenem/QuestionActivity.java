@@ -102,8 +102,8 @@ public class QuestionActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(String idLesson : idLessons){
                     if(!dataSnapshot.hasChild(idLesson) ||
-                            (dataSnapshot.child(idLesson).hasChild("isDone") &&
-                                    !((boolean) dataSnapshot.child(idLesson).child("isDone").getValue())))
+                            (dataSnapshot.child(idLesson).hasChild("done") &&
+                                    !((boolean) dataSnapshot.child(idLesson).child("done").getValue())))
                         idLessonsNotDone.add(idLesson);
                 }
                 if(idLessonsNotDone.size() == 0){
