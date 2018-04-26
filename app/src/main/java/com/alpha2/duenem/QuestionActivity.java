@@ -68,6 +68,7 @@ public class QuestionActivity extends BaseActivity {
         getNextLessonFromTopic();
 
         mContentView = setContentLayout(R.layout.content_question);
+        mContentView.setVisibility(View.INVISIBLE);
     }
 
     private void getNextLessonFromTopic(){
@@ -133,6 +134,7 @@ public class QuestionActivity extends BaseActivity {
                 mLesson = dataSnapshot.child(lessonUid).getValue(Lesson.class);
                 mLesson.setUid(lessonUid);
                 loadDataFromQuestion();
+                mContentView.setVisibility(View.VISIBLE);
             }
 
             @Override
