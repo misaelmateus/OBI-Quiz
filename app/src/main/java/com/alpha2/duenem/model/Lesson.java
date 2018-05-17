@@ -1,8 +1,5 @@
 package com.alpha2.duenem.model;
 
-import android.widget.Toast;
-
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
@@ -15,10 +12,27 @@ import java.util.List;
 
 public class Lesson implements Serializable {
     private Boolean isDone;
+    private String text;
     private String title;
     private String description;
     private String uid;
     private Topic topic;
+    private List<Material> materials;
+
+    public Lesson() {
+        materials = new ArrayList<>();
+        title = "";
+        description = "";
+        text = "";
+        isDone = false;
+    }
+
+    public Lesson(String title, String description) {
+        this.title = title;
+        this.description = description;
+        materials = new ArrayList<>();
+        isDone = false;
+    }
 
     public Topic getTopic() {
         return topic;
@@ -36,37 +50,20 @@ public class Lesson implements Serializable {
         this.uid = uid;
     }
 
-    private List<Material> materials;
-
-    public Lesson() {
-        materials = new ArrayList<>();
-        title = "";
-        description = "";
-        isDone = false;
+    public String getTitle() {
+        return this.title;
     }
-
-    public Lesson(String title, String description){
-        this.title = title;
-        this.description = description;
-        materials = new ArrayList<>();
-        isDone = false;
-    }
-
-
 
     public void setTitle(String title) {
         this.title = title;
     }
-    public void setDescription(String description){
-        this.description = description;
-    }
 
-    public String getTitle(){
-        return this.title;
-    }
-
-    public String getDescription(){
+    public String getDescription() {
         return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Exclude
@@ -78,12 +75,19 @@ public class Lesson implements Serializable {
         materials.add(material);
     }
 
-    public void setIsDone(Boolean isDone){
+    public void setIsDone(Boolean isDone) {
         this.isDone = isDone;
     }
-    public boolean isDone(){
+
+    public boolean isDone() {
         return this.isDone;
     }
 
+    public String getText() {
+        return text;
+    }
 
+    public void setText(String text) {
+        this.text = text;
+    }
 }

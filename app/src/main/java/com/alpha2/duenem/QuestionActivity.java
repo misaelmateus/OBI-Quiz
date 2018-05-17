@@ -3,6 +3,7 @@ package com.alpha2.duenem;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.res.ResourcesCompat;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,7 +19,6 @@ import com.alpha2.duenem.model.Material;
 import com.alpha2.duenem.model.Question;
 import com.alpha2.duenem.model.Topic;
 import com.alpha2.duenem.model.User;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -85,14 +85,14 @@ public class QuestionActivity extends BaseActivity {
                 Log.e(TAG, databaseError.getMessage());
                 Snackbar.make(mContentView, R.string.user_unauthorized_message, Snackbar.LENGTH_INDEFINITE)
                         .show();
-
             }
         });
     }
 
     private void getNextLessonFromUser(final List<String> idLessons){
-        mUserLessonRef = DBHelper.getLessonUsersByUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        final List<String> idLessonsNotDone = new ArrayList<String>();
+        final String userUid = DuEnemApplication.getInstance().getUser().getUid();
+        mUserLessonRef = DBHelper.getLessonUsersByUser(userUid);
+        final List<String> idLessonsNotDone = new ArrayList<>();
 
         mUserLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -120,6 +120,7 @@ public class QuestionActivity extends BaseActivity {
             }
         });
     }
+
     private void getNextLessonFromUid(final String lessonUid){
         final Query mLessonRef;
         mLessonRef = DBHelper.getLessonsFromTopic(mTopic.getUid());
@@ -198,19 +199,20 @@ public class QuestionActivity extends BaseActivity {
                     if (iSelected == correctAlternative) {
                         contCorrect++;
                         ShowCorrect();
-                        ChangeButtonState();
+                        changeButtonState();
                     } else {
                         ShowIncorrect(correctAlternative);
-                        ChangeButtonState();
+                        changeButtonState();
                     }
                 }
                 else {
-                    ChangeButtonState();
+                    changeButtonState();
                     nextQuestion();
                 }
             }
         });
     }
+
     private void initiate() {
         User user = DuEnemApplication.getInstance().getUser();
 
@@ -244,39 +246,42 @@ public class QuestionActivity extends BaseActivity {
     public void nextQuestion() {
         currentMaterial++;
 
-        ((ProgressBar)findViewById(R.id.progressBarQuestion)).setProgress((currentMaterial *100)/ materials.size());
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBarQuestion);
+        progressBar.setProgress((currentMaterial * 100) / materials.size());
 
         if (currentMaterial >= materials.size()) {
             endLesson();
-        }
-        else {
+        } else {
             setContent(materials.get(currentMaterial));
         }
     }
 
     private void setContent(Material material) {
+        TextView textLesson = (TextView) findViewById(R.id.textLesson);
         TextView textTitle = (TextView) findViewById(R.id.textTitleQuestion);
         TextView textContent = (TextView) findViewById(R.id.textContentQuestion);
 
-        textTitle.setText(getString(R.string.material_title, currentMaterial +1));
-        textContent.setText(material.getText());
+        textLesson.setText(Html.fromHtml(mLesson.getText()));
+
+        textTitle.setText(getString(R.string.material_title, currentMaterial+1));
+        textContent.setText(Html.fromHtml(material.getText()));
 
         if (material instanceof Question) {
-            setContentQuestion((Question) material, currentMaterial +1);
+            setContentQuestion((Question) material, currentMaterial+1);
         } else {
-            ChangeButtonState();
+            changeButtonState();
             findViewById(R.id.radioGroupQuestion).setVisibility(View.GONE);
             contCorrect++; //material count like question corrected
         }
     }
 
-    private void setContentQuestion(Question question, int l) {
+    private void setContentQuestion(Question question, int number) {
         RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroupQuestion);
         radioGroup.clearCheck();
         radioGroup.setVisibility(View.VISIBLE);
 
         TextView textTitle = (TextView) findViewById(R.id.textTitleQuestion);
-        textTitle.setText(getString(R.string.question_title, l));
+        textTitle.setText(getString(R.string.question_title, number));
 
         int[] ListId = new int[]{R.id.radioBt1, R.id.radioBt2, R.id.radioBt3, R.id.radioBt4, R.id.radioBt5};
         Integer[] order = new Integer[]{0, 1, 2, 3, 4};
@@ -285,7 +290,8 @@ public class QuestionActivity extends BaseActivity {
 
         for(int i = 0; i < 5; i++){
             RadioButton radioButton = (RadioButton)findViewById(ListId[i]);
-            radioButton.setText(question.getTextAlternative(list.get(i)));
+            radioButton.setText(
+                    Html.fromHtml(question.getTextAlternative(list.get(i))));
             radioButton.setTextColor(ResourcesCompat.getColor(getResources(), R.color.colorQuestionDefault, null));
             if(list.get(i) == 0)
                 correctAlternative = i;
@@ -317,7 +323,7 @@ public class QuestionActivity extends BaseActivity {
         if(id != -1) ((RadioButton)findViewById(id) ).setTextColor(ResourcesCompat.getColor(getResources(), R.color.colorQuestionCorrect, null));
     }
 
-    private void ChangeButtonState(){
+    private void changeButtonState(){
         Button bt = (Button) findViewById(R.id.buttonQuestion);
         if(buttonState == SUBMIT_BUTTON_STATES.VERIFY){
             bt.setText(R.string.bt_submit_continue_message);
