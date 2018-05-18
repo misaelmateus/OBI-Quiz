@@ -1,7 +1,5 @@
 package com.alpha2.duenem.model;
 
-import android.util.Pair;
-
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.PropertyName;
 
@@ -11,12 +9,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class LessonUser implements Serializable {
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private List<Historic> historic;
     private String uidLesson;
     private Boolean done = false;
-
 
     // System of Memorization -------------------------//
     private Date lastDate;
@@ -24,7 +23,6 @@ public class LessonUser implements Serializable {
     private Date nextDate;
     private double EF;
     private int interval;
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public LessonUser() {
         this.EF = 1.3;
@@ -42,6 +40,10 @@ public class LessonUser implements Serializable {
     @Exclude
     public Date getLastDate() {
         return lastDate;
+    }
+
+    public void setLastDate(String lastDate) throws ParseException {
+        this.lastDate = dateFormat.parse(lastDate);
     }
 
     @Exclude
@@ -62,12 +64,16 @@ public class LessonUser implements Serializable {
         return nextDate;
     }
 
+    // Firebase Database Getters and Setters
+
+    public void setNextDate(String nextDate) throws ParseException {
+        this.nextDate = dateFormat.parse(nextDate);
+    }
+
     @Exclude
     public void setNextDate(Date nextDate) {
         this.nextDate = nextDate;
     }
-
-    // Firebase Database Getters and Setters
 
     @PropertyName("lastDate")
     public String getLastDateString() {
@@ -79,62 +85,50 @@ public class LessonUser implements Serializable {
         return dateFormat.format(this.nextDate);
     }
 
-    public void setNextDate(String nextDate) throws ParseException {
-        this.nextDate = dateFormat.parse(nextDate);
-    }
-
-    public void setLastDate(String lastDate) throws ParseException {
-        this.lastDate = dateFormat.parse(lastDate);
-    }
-
-    public double getEF(){
+    public double getEF() {
         return this.EF;
     }
 
-    private void setNextEF(int q){
-        EF = EF+(0.1-(5-q)*(0.08+(5-q)*0.02));
-        if(EF < 1.3) EF = 1.3;
+    private void setNextEF(int q) {
+        EF = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+        if (EF < 1.3) EF = 1.3;
     }
 
-    public void setNextInterval(int q, Boolean isDone){
+    private void setNextInterval(int q, Boolean isDone) {
         if (q < 3) {
             interval = 1;
             correctStreak = 0;
-        }
-        else if(isDone){
-            return;
-        }
-        else if(correctStreak == 0) {
-            interval = 1;
-            correctStreak++;
-        }
-        else if(correctStreak == 1) {
-            interval = 4;
-            correctStreak++;
-        }
-        else {
-            setNextEF(q);
-            interval = (int) (interval * EF);
-            correctStreak++;
+        } else if (!isDone) {
+            if (correctStreak == 0) {
+                interval = 1;
+                correctStreak++;
+            } else if (correctStreak == 1) {
+                interval = 4;
+                correctStreak++;
+            } else {
+                setNextEF(q);
+                interval = (int) (interval * EF);
+                correctStreak++;
+            }
         }
     }
 
-    public void userDoneQuestion(int grade, Date date, int time){
-
+    public void userDoneQuestion(int grade, Date date, int time) {
         int q = 0;
-        if(grade >= 90) q = 5;
-        else if(grade >= 80) q = 4;
-        else if(grade >= 60) q = 3;
-        else if(grade >= 50) q = 2;
-        else if(grade >= 30) q = 1;
+        if (grade >= 90) q = 5;
+        else if (grade >= 80) q = 4;
+        else if (grade >= 60) q = 3;
+        else if (grade >= 50) q = 2;
+        else if (grade >= 30) q = 1;
         boolean isDone = false;
-        if(q >= 4) isDone = true;
+        if (q >= 4) isDone = true;
         setNextInterval(q, isDone);
         setNextDate(date);
         this.done |= isDone;
         historic.add(new Historic(date, grade, time));
     }
-    public int getInterval(){
+
+    public int getInterval() {
         return interval;
     }
 

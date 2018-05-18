@@ -170,14 +170,8 @@ public abstract class BaseActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
         int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -235,7 +229,8 @@ public abstract class BaseActivity extends AppCompatActivity
 
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            RoundedBitmapDrawable drawable = RoundedBitmapDrawableFactory.create(BaseActivity.this.getResources(), bitmap);
+            RoundedBitmapDrawable drawable = RoundedBitmapDrawableFactory
+                    .create(BaseActivity.this.getResources(), bitmap);
             drawable.setCircular(true);
             mView.setImageDrawable(drawable);
         }
