@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">DuEnem</string>
     <string name="title_main_activity">MainActivity</string>
-    <string name="title_activity_question">Question</string>
+    <string name="title_activity_question">Questão</string>
 
     <string name="google_play_console_web_client_id">4321504433-o70oil27u895os86gooq9rhsv0tn77p9.apps.googleusercontent.com</string>
 
@@ -35,7 +35,7 @@
     <string name="bt_submit_verify_message">Verificar</string>
     <string name="end_lesson_success_message">Parabéns, você terminou a lição com sucesso!!</string>
     <string name="end_lesson_fail_message">Que pena, você não acertou o suficiente\nNão desista, tente novamente!!</string>
-    <string name="lesson_result_message">Vocẽ acertou %1$d de %2$d questões.</string>
+    <string name="lesson_result_message">Você acertou %1$d de %2$d questões.</string>
     <string name="lesson_conclude">\"Parabéns, você concluiu a lição\"</string>
 
     <string name="title_train_activity">Treinar</string>

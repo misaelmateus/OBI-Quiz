@@ -71,8 +71,8 @@ public class QuestionActivity extends BaseActivity {
     }
 
     private void getNextLessonFromTopic() {
-        final Query lessonRef;
-        lessonRef = DBHelper.getLessonsFromTopic(mTopic.getUid());
+        final Query lessonRef = DBHelper.getLessonsFromTopic(mTopic.getUid());
+
         lessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -94,17 +94,16 @@ public class QuestionActivity extends BaseActivity {
 
     private void getNextLessonFromUser(final List<String> idLessons) {
         final String userUid = DuEnemApplication.getInstance().getUser().getUid();
-        Query mUserLessonRef = DBHelper.getLessonUsersByUser(userUid);
+        Query userLessonRef = DBHelper.getLessonUsersByUser(userUid);
         final List<String> idLessonsNotDone = new ArrayList<>();
 
-        mUserLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        userLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (String idLesson : idLessons) {
-                    if (!dataSnapshot.hasChild(idLesson) ||
-                            (dataSnapshot.child(idLesson).hasChild("done") &&
-                                    !((boolean) dataSnapshot.child(idLesson).child("done").getValue())))
+                    if (!dataSnapshot.hasChild(idLesson) || !(boolean) dataSnapshot.child(idLesson).child("done").getValue()) {
                         idLessonsNotDone.add(idLesson);
+                    }
                 }
                 if (idLessonsNotDone.size() == 0) {
                     topicCompleted();
@@ -124,12 +123,11 @@ public class QuestionActivity extends BaseActivity {
     }
 
     private void getNextLessonFromUid(final String lessonUid) {
-        final Query mLessonRef;
-        mLessonRef = DBHelper.getLessonsFromTopic(mTopic.getUid());
-        mLessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        final Query lessonRef = DBHelper.getLesson(mTopic.getUid(), lessonUid);
+        lessonRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mLesson = dataSnapshot.child(lessonUid).getValue(Lesson.class);
+                mLesson = dataSnapshot.getValue(Lesson.class);
                 mLesson.setUid(lessonUid);
                 loadDataFromQuestion();
             }
@@ -346,8 +344,12 @@ public class QuestionActivity extends BaseActivity {
     }
 
     private void endLesson() {
+        TextView lessonText = (TextView) findViewById(R.id.textLesson);
+        lessonText.setVisibility(View.GONE);
+
         RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radioGroupQuestion);
         radioGroup.setVisibility(View.GONE);
+
         int grade = (contCorrect * 100) / materials.size();
 
         TextView text1 = (TextView) findViewById(R.id.textTitleQuestion);
@@ -363,21 +365,20 @@ public class QuestionActivity extends BaseActivity {
             }
         });
 
-        if (!isQuestion) {
+        if (isQuestion) {
+            if (grade >= 70) {
+                text1.setText(R.string.end_lesson_success_message);
+            } else {
+                text1.setText(R.string.end_lesson_fail_message);
+            }
+
+            text2.setText(getString(R.string.lesson_result_message, contCorrect, materials.size()));
+
+            setUserLessonResult(grade);
+        } else {
             text1.setText(R.string.lesson_conclude);
             text2.setText("");
-            return;
         }
-
-        if (grade >= 70) {
-            text1.setText(R.string.end_lesson_success_message);
-        } else {
-            text1.setText(R.string.end_lesson_fail_message);
-        }
-
-        text2.setText(getString(R.string.lesson_result_message, contCorrect, materials.size()));
-
-        setUserLessonResult(grade);
     }
 
     private void setUserLessonResult(int grade) {
